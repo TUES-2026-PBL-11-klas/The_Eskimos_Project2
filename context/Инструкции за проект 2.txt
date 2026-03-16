@@ -1,0 +1,65 @@
+﻿Велосипедна навигация за София
+
+Същност на идеята
+	Навигация
+		* Въвеждане на начална и крайна точка (адрес или GPS)
+		* Генериране на маршрут с приоритет: велоалеи → паркове → тихи улици
+		* Избягване на булеварди и големи пътища
+		* Визуализация на маршрута върху карта
+		* Преизчисляване при отклонение от маршрута
+	Карта и данни
+    	* Показване на велоалеи и паркове в София
+    	* Текущо местоположение на потребителя
+	Допълнителни функции (nice-to-have)
+		* Запазване на любими маршрути
+		* Запазване на често използвани локации
+		* Стъпка по стъпка насоки ("след 200м завий наляво")
+		* Маркиране на типа на пътя 
+
+Компоненти
+	Frontend - UI
+		* мобилно приложение, подобно на google maps
+		* разглеждане на карта
+		* избиране на маршрут
+	Backend - Routing
+		* генериране на маршрут
+		* избягване на натоварен от коли трафик
+		* преизчисляване при отклонение
+	Database
+		* карта
+		* велоалеи, паркове, тихи улици
+	Devops - CI & CD
+		* качване на имиджи
+		* качване на контейнери
+		* автоматизиране
+
+Архитектура
+Clean Architecture (data / domain / presentation)
+	Presentation - Flutter UI widgets, screens, Riverpod providers. Не знае нищо за HTTP или SQLite.
+	Domain - Бизнес логика: entities (Route, BikeWay, Location), use cases, repository interfaces. Без Flutter зависимости.
+	Data - Имплементации: ValhallаRoutingRepository, SofiaplanRepository. HTTP клиент, SQLite, MBTiles четене.
+	
+Техстак
+	Мобилно приложение - Flutter (Dart)
+		* Карта - flutter_map + vector_map_tiles_mbtiles
+		* Офлайн тайлове - sofia.mbtiles (~50–100 MB)
+		* GPS - geolocator (Flutter пакет)
+		* API за велоалеи слой
+		* Велоалеи overlay - Sofiaplan GIS API → GeoJSON → PolylineLayer
+	Routing
+		* Valhalla (локален Docker → по-късно VPS)
+	База данни
+		* SQLite чрез sqflite (кеш на маршрути и велоалеи)
+	Разработка на софтуер
+		* Dependency Injection - get_it (service locator)
+		* State management - Riverpod
+		* Тестове - flutter_test + mockito
+	Pre-commit hooks
+		* Сканиране за тайни — открива pattern-и като API ключове, JWT токени, пароли в plaintext, .env файлове преди да са добавени в .gitignore
+		* Lint проверка — статичен анализ на Dart код (dart analyze); блокира commit при грешки
+		* Форматиране — dart format --set-exit-if-changed; блокира неформатиран код
+		* Забрана за debug артефакти — открива print() изрази, TODO коментари с hardcoded стойности
+	Виртуализация
+		* кубернетес клъстер
+		* pipeline - github actions
+		* secrets - .env, github secrets, k8s secrets
