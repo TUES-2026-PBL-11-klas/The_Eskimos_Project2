@@ -1,0 +1,65 @@
+name: CI Checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # 1. SECRET SCANNING
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history required by gitleaks
+
+      - name: Install Gitleaks
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest \
+            | grep '"tag_name"' | cut -d'"' -f4 | tr -d 'v')
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Run Gitleaks
+        run: gitleaks detect --source . --redact
+
+  # 2. DEBUG ARTIFACT DETECTION
+  debug-artifacts:
+    name: Debug Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for print() statements
+        run: |
+          if grep -rn --include="*.dart" -E '^\s*print\s*\(' .; then
+            echo "ERROR: print() statements found — remove before merging."
+            exit 1
+          fi
+
+      - name: Check for TODO/FIXME with hardcoded values
+        run: |
+          if grep -rEn --include="*.dart" '(TODO|FIXME).*["\x27][^"\x27]{3,}["\x27]' .; then
+            echo "ERROR: TODO/FIXME with hardcoded string literal found."
+            exit 1
+          fi
+
+  # 3. DART LINT & FORMAT
+  dart-checks:
+    name: Dart Lint & Format
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cirruslabs/flutter:stable
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Dart analyze
+        run: dart analyze --fatal-infos
+
+      - name: Dart format
+        run: dart format --set-exit-if-changed .
