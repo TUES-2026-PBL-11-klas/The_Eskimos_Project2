@@ -52,6 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/cirruslabs/flutter:stable
+    defaults:
+      run:
+        working-directory: app
     steps:
       - uses: actions/checkout@v4
 
@@ -63,3 +66,23 @@ jobs:
 
       - name: Dart format
         run: dart format --set-exit-if-changed .
+
+  # 4. FLUTTER TESTS
+  flutter-tests:
+    name: Flutter Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    container:
+      image: ghcr.io/cirruslabs/flutter:stable
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
