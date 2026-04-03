@@ -7,7 +7,7 @@ abstract interface class RouteCacheRepository {
   Future<BikeRoute?> getRoute(
     Location origin,
     Location destination, {
-    double toleranceDeg,
+    double toleranceDeg = 0.0001,
   });
 
   /// Persists [route] so that it can be retrieved later.

@@ -71,6 +71,8 @@ jobs:
   flutter-tests:
     name: Flutter Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: ghcr.io/cirruslabs/flutter:stable
     defaults:
