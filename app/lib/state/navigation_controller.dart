@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 import '../data/models/route_response.dart';
-import '../../../commits/services/polyline6_decoder.dart';
-import '../../../commits/services/route_progress_tracker.dart';
+import '../services/polyline6_decoder.dart';
+import '../services/route_progress_tracker.dart';
 
 class NavigationState {
   const NavigationState({

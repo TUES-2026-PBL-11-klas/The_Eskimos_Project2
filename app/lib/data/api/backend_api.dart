@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import '../../../../commits/core/api_client.dart';
+import '../../core/api_client.dart';
 import '../models/bike_profile.dart';
 import '../models/geocode_result.dart';
 import '../models/route_request.dart';

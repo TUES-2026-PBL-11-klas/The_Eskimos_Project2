@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../../../commits/core/api_client.dart';
+import '../core/api_client.dart';
 import '../data/api/backend_api.dart';
 import '../data/db/bike_ways_dao.dart';
 import '../data/db/cache_db.dart';
@@ -10,7 +10,7 @@ import '../data/models/bike_profile.dart';
 import '../data/repositories/bike_lanes_repository.dart';
 import '../data/repositories/geocoding_repository.dart';
 import '../data/repositories/routing_repository.dart';
-import '../../../commits/services/location_service.dart';
+import '../services/location_service.dart';
 
 final apiClientProvider = Provider<ApiClient>((ref) => ApiClient());
 

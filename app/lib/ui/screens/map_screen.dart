@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
-import '../../../../commits/core/config.dart';
-import '../../../../commits/services/tile_server.dart';
+import '../../core/config.dart';
+import '../../services/tile_server.dart';
 import '../../state/providers.dart';
 import 'search_screen.dart';
 

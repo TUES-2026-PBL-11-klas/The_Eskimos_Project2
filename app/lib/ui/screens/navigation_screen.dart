@@ -4,7 +4,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../data/models/route_response.dart';
-import '../../../../commits/services/tile_server.dart';
+import '../../services/tile_server.dart';
 import '../../state/navigation_controller.dart';
 import '../../state/providers.dart';
 import '../widgets/maneuver_card.dart';

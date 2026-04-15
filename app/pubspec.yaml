@@ -1,14 +1,28 @@
-name: bike_app
-description: "A new Flutter project."
+name: sofia_bike_nav
+description: Offline bike navigation for Sofia.
 publish_to: 'none'
 version: 0.1.0+1
 
 environment:
-  sdk: ^3.11.3
+  sdk: ^3.5.0
+  flutter: ">=3.24.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  flutter_riverpod: ^3.3.1
+  dio: ^5.7.0
+  maplibre_gl: ^0.25.0
+  geolocator: ^14.0.2
+  permission_handler: ^12.0.1
+  sqflite: ^2.4.0
+  path_provider: ^2.1.4
+  path: ^1.9.0
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+  crypto: ^3.0.5
+  intl: ^0.20.2
+  wakelock_plus: ^1.2.8
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +31,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/sofia.mbtiles
+    - assets/style/style_sofia.json
