@@ -1,0 +1,110 @@
+{
+  "mjolnir": {
+    "tile_dir": "/custom_files/valhalla_tiles",
+    "admin": "/custom_files/valhalla_tiles/admin.sqlite",
+    "timezone": "/custom_files/valhalla_tiles/tz_world.sqlite",
+    "concurrency": 2,
+    "tile_extract": "",
+    "traffic_extract": "",
+    "shortcut_caching": false,
+    "global_synchronized_cache": false,
+    "max_cache_size": 1000000000
+  },
+  "additional_data": {
+    "elevation": "/custom_files/elevation_data"
+  },
+  "httpd": {
+    "service": {
+      "listen": "tcp://*:8002",
+      "loopback": "ipc:///tmp/loopback",
+      "interrupt": "ipc:///tmp/interrupt",
+      "drain_seconds": 28,
+      "shutdown_seconds": 1
+    }
+  },
+  "loki": {
+    "actions": [
+      "locate",
+      "route",
+      "height",
+      "sources_to_targets",
+      "optimized_route",
+      "isochrone",
+      "trace_route",
+      "trace_attributes",
+      "transit_available",
+      "status"
+    ],
+    "service": {
+      "proxy": "ipc:///tmp/loki"
+    },
+    "service_defaults": {
+      "minimum_reachability": 50,
+      "radius": 0,
+      "search_cutoff": 35000,
+      "node_snap_tolerance": 5,
+      "street_side_tolerance": 5,
+      "heading_tolerance": 60
+    }
+  },
+  "thor": {
+    "logging": {
+      "long_request": 110.0
+    },
+    "service": {
+      "proxy": "ipc:///tmp/thor"
+    }
+  },
+  "odin": {
+    "service": {
+      "proxy": "ipc:///tmp/odin"
+    }
+  },
+  "meili": {
+    "default": {
+      "beta": 3,
+      "breakage_distance": 2000,
+      "geometry": "polyline6",
+      "gps_accuracy": 5.0,
+      "interpolation_distance": 10,
+      "search_radius": 50,
+      "sigma_z": 4.07,
+      "turn_penalty_factor": 200
+    },
+    "service": {
+      "proxy": "ipc:///tmp/meili"
+    }
+  },
+  "service_limits": {
+    "auto": {
+      "max_distance": 5000000.0,
+      "max_locations": 20,
+      "max_matrix_distance": 400000.0,
+      "max_matrix_location_pairs": 2500
+    },
+    "bicycle": {
+      "max_distance": 500000.0,
+      "max_locations": 50,
+      "max_matrix_distance": 200000.0,
+      "max_matrix_location_pairs": 2500
+    },
+    "pedestrian": {
+      "max_distance": 250000.0,
+      "max_locations": 50,
+      "max_matrix_distance": 200000.0,
+      "max_matrix_location_pairs": 2500,
+      "max_transit_walking_distance": 10000,
+      "min_transit_walking_distance": 1
+    },
+    "max_exclude_locations": 50,
+    "max_radius": 200,
+    "max_reachability": 100,
+    "max_alternates": 2,
+    "max_exclude_polygons_length": 10000
+  },
+  "logging": {
+    "type": "std_out",
+    "color": true,
+    "file_name": "path_to_some_file.log"
+  }
+}

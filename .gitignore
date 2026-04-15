@@ -27,3 +27,18 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# OSM / Valhalla data (large, generated)
+*.osm.pbf
+valhalla_tiles/
+elevation_data/
+
+# Docker volumes (not tracked)
+pbf_data/
