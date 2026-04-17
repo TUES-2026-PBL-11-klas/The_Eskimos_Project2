@@ -1,6 +1,7 @@
 """Unit tests for route request building and response parsing."""
 
 import json
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
@@ -8,6 +9,11 @@ import pytest
 
 from app.models.route_request import Coordinate, RouteRequest
 from app.services.valhalla_client import _build_valhalla_request, get_route
+
+# Load the actual zone count from the data file so tests stay in sync
+_AVOID_PATH = Path(__file__).parent.parent / "app" / "data" / "avoid_polygons.json"
+with _AVOID_PATH.open() as _f:
+    _NUM_DANGER_ZONES = len(json.load(_f)["dangerous_zones"])
 
 SOFIA_CENTER = Coordinate(lat=42.6977, lon=23.3219)
 LOZENETS = Coordinate(lat=42.6833, lon=23.3147)
@@ -23,7 +29,7 @@ def test_build_request_city_bike():
     assert len(payload["locations"]) == 2
     assert payload["locations"][0] == {"lat": 42.6977, "lon": 23.3219}
     assert "exclude_polygons" in payload  # avoid_dangerous=True by default
-    assert len(payload["exclude_polygons"]) == 3  # 3 danger zones
+    assert len(payload["exclude_polygons"]) == _NUM_DANGER_ZONES
     assert payload["elevation_interval"] == 30  # include_elevation=True by default
 
 
@@ -67,8 +73,8 @@ def test_build_request_extra_avoid_polygon():
         start=SOFIA_CENTER, end=LOZENETS, extra_avoid_polygons=[extra]
     )
     payload = _build_valhalla_request(req)
-    # 3 hardcoded + 1 user-supplied
-    assert len(payload["exclude_polygons"]) == 4
+    # hardcoded zones + 1 user-supplied
+    assert len(payload["exclude_polygons"]) == _NUM_DANGER_ZONES + 1
 
 
 def test_invalid_profile_raises():

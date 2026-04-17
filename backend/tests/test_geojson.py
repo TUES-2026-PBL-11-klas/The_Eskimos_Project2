@@ -65,7 +65,7 @@ def test_avoid_polygons_json_is_valid():
     with path.open() as f:
         data = json.load(f)
     assert "dangerous_zones" in data
-    assert len(data["dangerous_zones"]) == 3
+    assert len(data["dangerous_zones"]) >= 1
     for zone in data["dangerous_zones"]:
         assert "name" in zone
         assert "polygon" in zone

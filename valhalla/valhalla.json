@@ -100,7 +100,7 @@
     "max_radius": 200,
     "max_reachability": 100,
     "max_alternates": 2,
-    "max_exclude_polygons_length": 10000
+    "max_exclude_polygons_length": 200000
   },
   "logging": {
     "type": "std_out",

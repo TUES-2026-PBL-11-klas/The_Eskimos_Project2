@@ -13,7 +13,7 @@ services:
 
   # ── Phase 1: Valhalla routing engine ──────────────────────────────────────
   valhalla:
-    image: ghcr.io/valhalla/valhalla:latest
+    image: ghcr.io/gis-ops/docker-valhalla/valhalla:latest
     container_name: valhalla
     ports:
       - "8002:8002"
@@ -25,8 +25,8 @@ services:
       # Tile build settings
       server_threads: "2"
       build_elevation: "True"
-      build_admins: "True"
-      build_time_zones: "True"
+      build_admins: "False"
+      build_time_zones: "False"
       force_rebuild: "False"
       # Bounding box for elevation data (Sofia + surroundings)
       min_x: "22.3"
