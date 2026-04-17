@@ -46,6 +46,7 @@ jobs:
             exit 1
           fi
 
+<<<<<<< Updated upstream:.github/workflows/checks.yml
   # 3. DART LINT & FORMAT
   dart-checks:
     name: Dart Lint & Format
@@ -63,3 +64,6 @@ jobs:
 
       - name: Dart format
         run: dart format --set-exit-if-changed .
+=======
+  
+>>>>>>> Stashed changes:.github/workflows/clean-checks.yml
