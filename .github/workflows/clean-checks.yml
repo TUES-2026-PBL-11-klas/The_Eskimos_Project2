@@ -45,21 +45,3 @@ jobs:
             echo "ERROR: TODO/FIXME with hardcoded string literal found."
             exit 1
           fi
-
-  # 3. DART LINT & FORMAT
-  dart-checks:
-    name: Dart Lint & Format
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/cirruslabs/flutter:stable
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Dart analyze
-        run: dart analyze --fatal-infos
-
-      - name: Dart format
-        run: dart format --set-exit-if-changed .

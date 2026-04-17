@@ -1,0 +1,74 @@
+services:
+
+  # ── Phase 0: Download + merge PBF (runs once, exits) ──────────────────────
+  pbf-builder:
+    build:
+      context: ./pbf-builder
+      dockerfile: Dockerfile
+    container_name: pbf-builder
+    volumes:
+      - pbf_data:/data                     # shared volume: writes merged PBF here
+      - ./assets:/data/geojson:ro          # GeoJSON bike lane data (read-only)
+    restart: "no"                          # init container — exit after work is done
+
+  # ── Phase 1: Valhalla routing engine ──────────────────────────────────────
+  valhalla:
+    image: ghcr.io/gis-ops/docker-valhalla/valhalla:latest
+    container_name: valhalla
+    ports:
+      - "8002:8002"
+    volumes:
+      - pbf_data:/custom_files             # reads merged-bulgaria.osm.pbf from here
+      - valhalla_tiles:/custom_files/valhalla_tiles
+      - valhalla_elevation:/custom_files/elevation_data
+    environment:
+      # Tile build settings
+      server_threads: "2"
+      build_elevation: "True"
+      build_admins: "False"
+      build_time_zones: "False"
+      force_rebuild: "False"
+      # Bounding box for elevation data (Sofia + surroundings)
+      min_x: "22.3"
+      max_x: "24.5"
+      min_y: "42.4"
+      max_y: "43.0"
+    depends_on:
+      pbf-builder:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8002/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 600s   # tile build takes 5-10 min on first run
+
+  # ── Phase 2: Backend routing API ──────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bike-routing-api
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./assets:/app/assets:ro            # GeoJSON files for /bike-lanes endpoints
+    environment:
+      VALHALLA_URL: "http://valhalla:8002"
+      LOG_LEVEL: "info"
+    depends_on:
+      valhalla:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  pbf_data:           # merged PBF shared between pbf-builder and valhalla
+  valhalla_tiles:     # persisted routing tiles (skips rebuild on restart)
+  valhalla_elevation: # persisted SRTM elevation tiles

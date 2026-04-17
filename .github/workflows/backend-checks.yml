@@ -1,0 +1,54 @@
+name: Backend CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+      - "pbf-builder/**"
+      - "docker-compose.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "pbf-builder/**"
+      - "docker-compose.yml"
+
+jobs:
+  lint-and-test:
+    name: Backend Lint & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Ruff lint
+        run: ruff check .
+
+      - name: Ruff format check
+        run: ruff format --check .
+
+      - name: Run tests
+        run: pytest -v --tb=short
+
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t bike-routing-api:ci ./backend
+
+      - name: Build pbf-builder image
+        run: docker build -t pbf-builder:ci ./pbf-builder
