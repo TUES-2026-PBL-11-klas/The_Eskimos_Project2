@@ -7,7 +7,7 @@
       "type": "vector",
       "tiles": ["http://127.0.0.1:{PORT}/tiles/{z}/{x}/{y}.pbf"],
       "minzoom": 0,
-      "maxzoom": 14
+      "maxzoom": 15
     }
   },
   "layers": [
@@ -135,7 +135,7 @@
       "layout": {
         "symbol-placement": "line",
         "text-field": "{name}",
-        "text-font": ["Open Sans Regular"],
+        "text-font": ["Noto Sans Regular"],
         "text-size": 12
       },
       "paint": {
@@ -152,7 +152,7 @@
       "filter": ["in", "class", "city", "town"],
       "layout": {
         "text-field": "{name}",
-        "text-font": ["Open Sans Semibold"],
+        "text-font": ["Noto Sans Bold"],
         "text-size": 14
       },
       "paint": {
@@ -170,11 +170,37 @@
       "filter": ["in", "class", "suburb", "neighbourhood", "village"],
       "layout": {
         "text-field": "{name}",
-        "text-font": ["Open Sans Regular"],
+        "text-font": ["Noto Sans Regular"],
         "text-size": 11
       },
       "paint": {
         "text-color": "#5f6368",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1.2
+      }
+    },
+    {
+      "id": "poi-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "poi",
+      "minzoom": 14,
+      "filter": ["in", "class",
+        "restaurant", "cafe", "bar", "fast_food",
+        "lodging", "hospital", "school", "college",
+        "bus", "railway", "attraction", "monument",
+        "park", "grocery", "pharmacy", "shop"
+      ],
+      "layout": {
+        "text-field": "{name}",
+        "text-font": ["Noto Sans Regular"],
+        "text-size": 11,
+        "text-offset": [0, 0.8],
+        "text-anchor": "top",
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#444444",
         "text-halo-color": "#ffffff",
         "text-halo-width": 1.2
       }
