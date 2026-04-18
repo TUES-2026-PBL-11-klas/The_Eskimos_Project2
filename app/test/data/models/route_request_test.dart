@@ -12,7 +12,6 @@ void main() {
         profile: BikeProfileId.cityBike,
       );
       expect(req.avoidDangerous, true);
-      expect(req.includeElevation, false);
       expect(req.language, 'bg-BG');
       expect(req.extraAvoidPolygons, isEmpty);
     });
@@ -39,7 +38,6 @@ void main() {
         end: LatLngPoint(1, 1),
         profile: BikeProfileId.mountainBike,
         avoidDangerous: false,
-        includeElevation: true,
         language: 'en-US',
         extraAvoidPolygons: [
           [LatLngPoint(0, 0), LatLngPoint(0, 1), LatLngPoint(1, 1)],
@@ -47,7 +45,7 @@ void main() {
       );
       final j = req.toJson();
       expect(j['avoid_dangerous'], false);
-      expect(j['include_elevation'], true);
+      expect(j['include_elevation'], false);
       expect(j['language'], 'en-US');
       expect(j['profile'], 'mountain_bike');
       final polys = j['extra_avoid_polygons'] as List;

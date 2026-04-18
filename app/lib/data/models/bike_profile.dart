@@ -7,8 +7,10 @@ enum BikeProfileId {
   final String value;
 
   static BikeProfileId fromValue(String v) =>
-      BikeProfileId.values.firstWhere((e) => e.value == v,
-          orElse: () => BikeProfileId.cityBike);
+      BikeProfileId.values.firstWhere(
+        (e) => e.value == v,
+        orElse: () => throw ArgumentError('Unknown bike profile id: $v'),
+      );
 }
 
 class BikeProfile {

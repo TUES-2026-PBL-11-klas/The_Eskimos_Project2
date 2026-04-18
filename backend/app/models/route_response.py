@@ -20,8 +20,8 @@ class Maneuver(BaseModel):
 class RouteResponse(BaseModel):
     distance_km: float
     duration_minutes: float
-    polyline: str          # Valhalla encoded polyline6 of the full route shape
-    legs: list[dict]       # Raw Valhalla legs for detailed per-leg info
+    polyline: str  # Valhalla encoded polyline6 of the full route shape
+    legs: list[dict]  # Raw Valhalla legs for detailed per-leg info
     elevation: ElevationSummary | None = None
     maneuvers: list[Maneuver]
     warnings: list[str]

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -21,20 +23,23 @@ class NavigationScreen extends ConsumerStatefulWidget {
 class _NavigationScreenState extends ConsumerState<NavigationScreen> {
   MapLibreMapController? _map;
   bool _routeDrawn = false;
+  bool _disposed = false;
   String? _styleStringPath;
+  String? _styleLoadError;
   ProviderSubscription<AsyncValue<dynamic>>? _posSub;
 
   @override
   void initState() {
     super.initState();
     WakelockPlus.enable();
-    TileServer.instance.prepareStyle().then((path) {
-      if (mounted) setState(() => _styleStringPath = path);
-    });
+    _loadStyle();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_disposed) return;
       ref.read(navigationControllerProvider.notifier).start(widget.route);
       _posSub = ref.listenManual(currentPositionProvider, (prev, next) {
+        if (_disposed) return;
         next.whenData((pos) {
+          if (_disposed) return;
           final ll = LatLng(pos.latitude, pos.longitude);
           ref
               .read(navigationControllerProvider.notifier)
@@ -54,8 +59,26 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
     });
   }
 
+  Future<void> _loadStyle() async {
+    try {
+      final path = await TileServer.instance.prepareStyle();
+      if (!mounted || _disposed) return;
+      setState(() => _styleStringPath = path);
+    } catch (e, st) {
+      developer.log(
+        'TileServer.prepareStyle failed',
+        name: 'navigation_screen',
+        error: e,
+        stackTrace: st,
+      );
+      if (!mounted || _disposed) return;
+      setState(() => _styleLoadError = e.toString());
+    }
+  }
+
   @override
   void dispose() {
+    _disposed = true;
     _posSub?.close();
     WakelockPlus.disable();
     ref.read(navigationControllerProvider.notifier).stop();
@@ -102,7 +125,17 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
         children: [
           Expanded(
             flex: 3,
-            child: _styleStringPath == null
+            child: _styleLoadError != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        'Map unavailable: $_styleLoadError',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                : _styleStringPath == null
                 ? const Center(child: CircularProgressIndicator())
                 : MapLibreMap(
                     styleString: _styleStringPath!,

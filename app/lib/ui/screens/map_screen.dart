@@ -1,3 +1,6 @@
+import 'dart:developer' as developer;
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -20,6 +23,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   MapLibreMapController? _map;
   String? _styleStringPath;
   bool _bikeLanesAdded = false;
+  bool _bikeLanesLoadFailed = false;
   bool _permissionResolved = false;
   Circle? _searchMarker;
 
@@ -66,8 +70,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         ),
       );
       _bikeLanesAdded = true;
-    } catch (_) {
-      // offline or no cache yet — render base map without lanes
+    } on SocketException {
+      // Offline is normal — base map renders without overlay, no banner.
+    } catch (e, st) {
+      developer.log(
+        'bike-lanes overlay load failed',
+        name: 'map_screen',
+        error: e,
+        stackTrace: st,
+      );
+      if (mounted) setState(() => _bikeLanesLoadFailed = true);
     }
   }
 
@@ -152,6 +164,22 @@ class _MapScreenState extends ConsumerState<MapScreen> {
               ),
             ),
           ),
+          if (_bikeLanesLoadFailed)
+            const Positioned(
+              bottom: 100,
+              left: 16,
+              right: 16,
+              child: Material(
+                color: Colors.black54,
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text(
+                    'Bike-lane overlay unavailable',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
           Positioned(
             top: 0,
             left: 0,

@@ -1,5 +1,25 @@
 services:
 
+  # ── PostGIS database (holds bike lanes + avoid polygons) ──────────────────
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: bike-postgis
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bike}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bike}
+      POSTGRES_DB: ${POSTGRES_DB:-bike_routing}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bike} -d ${POSTGRES_DB:-bike_routing}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
   # ── Phase 0: Download + merge PBF (runs once, exits) ──────────────────────
   pbf-builder:
     build:
@@ -57,8 +77,12 @@ services:
     environment:
       VALHALLA_URL: "http://valhalla:8002"
       LOG_LEVEL: "info"
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-bike}:${POSTGRES_PASSWORD:-bike}@postgis:5432/${POSTGRES_DB:-bike_routing}"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost:8001}"
     depends_on:
       valhalla:
+        condition: service_healthy
+      postgis:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -72,3 +96,4 @@ volumes:
   pbf_data:           # merged PBF shared between pbf-builder and valhalla
   valhalla_tiles:     # persisted routing tiles (skips rebuild on restart)
   valhalla_elevation: # persisted SRTM elevation tiles
+  pg_data:            # PostGIS data directory

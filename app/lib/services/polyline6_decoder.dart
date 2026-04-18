@@ -1,18 +1,29 @@
+import 'dart:developer' as developer;
+
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 /// Decodes Valhalla's polyline6 (1e-6 precision) encoding into LatLng points.
+/// On truncation, returns the points decoded so far and logs a warning.
 List<LatLng> decodePolyline6(String encoded, {int precision = 6}) {
   final factor = 1 / _pow10(precision);
   final List<LatLng> points = [];
+  final int len = encoded.length;
   int index = 0;
   int lat = 0;
   int lon = 0;
 
-  while (index < encoded.length) {
+  while (index < len) {
     int result = 1;
     int shift = 0;
     int b;
     do {
+      if (index >= len) {
+        developer.log(
+          'polyline6: truncated mid-latitude at index $index',
+          name: 'polyline6_decoder',
+        );
+        return points;
+      }
       b = encoded.codeUnitAt(index++) - 63 - 1;
       result += b << shift;
       shift += 5;
@@ -23,6 +34,13 @@ List<LatLng> decodePolyline6(String encoded, {int precision = 6}) {
     result = 1;
     shift = 0;
     do {
+      if (index >= len) {
+        developer.log(
+          'polyline6: truncated mid-longitude at index $index',
+          name: 'polyline6_decoder',
+        );
+        return points;
+      }
       b = encoded.codeUnitAt(index++) - 63 - 1;
       result += b << shift;
       shift += 5;

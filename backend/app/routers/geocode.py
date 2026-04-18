@@ -1,5 +1,6 @@
 """Geocoding endpoint — thin proxy over Photon, restricted to Sofia."""
 
+import json
 import logging
 
 import httpx
@@ -53,17 +54,29 @@ async def geocode(
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(_PHOTON_URL, params=params)
     except httpx.TimeoutException:
+        logger.warning("Photon geocoder timeout for query %r", q)
         raise HTTPException(status_code=504, detail="Geocoder timeout")
-    except httpx.ConnectError:
+    except httpx.ConnectError as exc:
+        logger.warning("Photon geocoder connection error: %s", exc)
         raise HTTPException(status_code=503, detail="Cannot reach geocoder")
 
     if response.status_code != 200:
+        logger.warning(
+            "Photon returned %s for %r: %s",
+            response.status_code,
+            q,
+            response.text[:200],
+        )
         raise HTTPException(
             status_code=502,
             detail=f"Geocoder returned {response.status_code}",
         )
 
-    data = response.json()
+    try:
+        data = response.json()
+    except (json.JSONDecodeError, ValueError) as exc:
+        logger.warning("Photon returned invalid JSON for %r: %s", q, exc)
+        raise HTTPException(status_code=502, detail="Geocoder returned invalid JSON")
     results: list[GeocodeResult] = []
     for feature in data.get("features", []):
         coords = feature.get("geometry", {}).get("coordinates") or []

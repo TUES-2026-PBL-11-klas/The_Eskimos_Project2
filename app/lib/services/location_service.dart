@@ -1,8 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
-  Stream<Position>? _stream;
-
   Future<bool> ensurePermission() async {
     if (!await Geolocator.isLocationServiceEnabled()) return false;
     var perm = await Geolocator.checkPermission();
@@ -13,14 +11,17 @@ class LocationService {
         perm == LocationPermission.whileInUse;
   }
 
+  /// Returns a fresh position stream each call. Geolocator's underlying
+  /// platform channel handles listener multiplexing, so there's no cost to
+  /// skipping the cache and it avoids the "canceled once, broken forever"
+  /// bug that a shared stream causes.
   Stream<Position> positionStream() {
-    _stream ??= Geolocator.getPositionStream(
+    return Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 3,
       ),
     );
-    return _stream!;
   }
 
   Future<Position?> currentPosition() async {

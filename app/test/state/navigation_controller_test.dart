@@ -43,7 +43,6 @@ RouteResponseDto _sampleRoute() {
     distanceKm: 0.222,
     durationMinutes: 1.0,
     polyline: _encodePolyline6(pts),
-    legs: const [],
     maneuvers: const [
       Maneuver(
         instruction: 'Start',
@@ -55,7 +54,6 @@ RouteResponseDto _sampleRoute() {
         endShapeIndex: 2,
       ),
     ],
-    warnings: const [],
   );
 }
 

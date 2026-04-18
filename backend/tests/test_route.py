@@ -47,17 +47,13 @@ def test_build_request_electric_bike_no_hills():
 
 
 def test_build_request_no_dangerous_zones():
-    req = RouteRequest(
-        start=SOFIA_CENTER, end=LOZENETS, avoid_dangerous=False
-    )
+    req = RouteRequest(start=SOFIA_CENTER, end=LOZENETS, avoid_dangerous=False)
     payload = _build_valhalla_request(req)
     assert "exclude_polygons" not in payload
 
 
 def test_build_request_no_elevation():
-    req = RouteRequest(
-        start=SOFIA_CENTER, end=LOZENETS, include_elevation=False
-    )
+    req = RouteRequest(start=SOFIA_CENTER, end=LOZENETS, include_elevation=False)
     payload = _build_valhalla_request(req)
     assert "elevation_interval" not in payload
 
@@ -69,9 +65,7 @@ def test_build_request_extra_avoid_polygon():
         Coordinate(lat=42.71, lon=23.34),
         Coordinate(lat=42.70, lon=23.34),
     ]
-    req = RouteRequest(
-        start=SOFIA_CENTER, end=LOZENETS, extra_avoid_polygons=[extra]
-    )
+    req = RouteRequest(start=SOFIA_CENTER, end=LOZENETS, extra_avoid_polygons=[extra])
     payload = _build_valhalla_request(req)
     # hardcoded zones + 1 user-supplied
     assert len(payload["exclude_polygons"]) == _NUM_DANGER_ZONES + 1

@@ -24,34 +24,39 @@ class RoutesDao {
   }
 
   Future<RouteResponseDto?> get(String id) async {
-    final rows = await _db.database.query(
-      'cached_routes',
-      where: 'id = ?',
-      whereArgs: [id],
-      limit: 1,
-    );
-    if (rows.isEmpty) return null;
-    final row = rows.first;
-    final cachedAt = row['cached_at'] as int;
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    if (now - cachedAt > AppConfig.routeCacheTtlSeconds) {
-      await _db.database
-          .delete('cached_routes', where: 'id = ?', whereArgs: [id]);
-      return null;
-    }
-    final geometry =
-        json.decode(row['geometry_json'] as String) as Map<String, dynamic>;
-    final steps = (json.decode(row['steps_json'] as String) as List)
-        .map((e) => Maneuver.fromJson(Map<String, dynamic>.from(e as Map)))
-        .toList();
-    return RouteResponseDto(
-      distanceKm: (row['distance_m'] as num).toDouble() / 1000.0,
-      durationMinutes: (row['duration_s'] as num).toDouble() / 60.0,
-      polyline: geometry['polyline'] as String? ?? '',
-      legs: const [],
-      maneuvers: steps,
-      warnings: const [],
-    );
+    // Atomic read-then-expire so a concurrent writer can't insert a fresh row
+    // between the SELECT and the DELETE.
+    return _db.database.transaction((txn) async {
+      final rows = await txn.query(
+        'cached_routes',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      final row = rows.first;
+      final cachedAt = row['cached_at'] as int;
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      if (now - cachedAt > AppConfig.routeCacheTtlSeconds) {
+        await txn.delete(
+          'cached_routes',
+          where: 'id = ? AND cached_at = ?',
+          whereArgs: [id, cachedAt],
+        );
+        return null;
+      }
+      final geometry =
+          json.decode(row['geometry_json'] as String) as Map<String, dynamic>;
+      final steps = (json.decode(row['steps_json'] as String) as List)
+          .map((e) => Maneuver.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList();
+      return RouteResponseDto(
+        distanceKm: (row['distance_m'] as num).toDouble() / 1000.0,
+        durationMinutes: (row['duration_s'] as num).toDouble() / 60.0,
+        polyline: geometry['polyline'] as String? ?? '',
+        maneuvers: steps,
+      );
+    });
   }
 
   Future<void> put(
@@ -59,19 +64,21 @@ class RoutesDao {
     RouteResponseDto route,
     BikeProfileId profile,
   ) async {
-    await _db.database.insert(
-      'cached_routes',
-      {
-        'id': id,
-        'geometry_json': json.encode({'polyline': route.polyline}),
-        'steps_json':
-            json.encode(route.maneuvers.map((m) => m.toJson()).toList()),
-        'distance_m': route.distanceKm * 1000.0,
-        'duration_s': route.durationMinutes * 60.0,
-        'profile': profile.value,
-        'cached_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await _db.database.transaction((txn) async {
+      await txn.insert(
+        'cached_routes',
+        {
+          'id': id,
+          'geometry_json': json.encode({'polyline': route.polyline}),
+          'steps_json':
+              json.encode(route.maneuvers.map((m) => m.toJson()).toList()),
+          'distance_m': route.distanceKm * 1000.0,
+          'duration_s': route.durationMinutes * 60.0,
+          'profile': profile.value,
+          'cached_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 }

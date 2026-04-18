@@ -41,9 +41,7 @@ void main() {
     distanceKm: 1.0,
     durationMinutes: 5.0,
     polyline: 'x',
-    legs: [],
     maneuvers: [],
-    warnings: [],
   );
 
   ProviderContainer makeContainer({required RoutingRepository repo}) {

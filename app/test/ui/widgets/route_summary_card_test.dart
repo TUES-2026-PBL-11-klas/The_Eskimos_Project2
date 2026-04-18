@@ -19,9 +19,7 @@ void main() {
     distanceKm: 2.347,
     durationMinutes: 11.6,
     polyline: '',
-    legs: [],
     maneuvers: [],
-    warnings: [],
   );
 
   Widget wrap(Widget child) => MaterialApp(home: Scaffold(body: child));

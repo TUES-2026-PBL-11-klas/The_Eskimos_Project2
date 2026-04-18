@@ -74,9 +74,7 @@ void main() {
         distanceKm: 1.0,
         durationMinutes: 5.0,
         polyline: 'cached',
-        legs: [],
         maneuvers: [],
-        warnings: [],
       );
       final dao = _FakeRoutesDao(cached: cached);
       final adapter = _FakeAdapter(const {});

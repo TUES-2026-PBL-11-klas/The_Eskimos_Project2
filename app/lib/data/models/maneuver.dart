@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 class Maneuver {
   const Maneuver({
     required this.instruction,
@@ -17,17 +19,35 @@ class Maneuver {
   final int beginShapeIndex;
   final int endShapeIndex;
 
-  factory Maneuver.fromJson(Map<String, dynamic> j) => Maneuver(
-        instruction: j['instruction'] as String? ?? '',
-        streetNames: ((j['street_names'] as List?) ?? const [])
-            .map((e) => e.toString())
-            .toList(),
-        lengthKm: (j['length_km'] as num?)?.toDouble() ?? 0.0,
-        timeSeconds: (j['time_seconds'] as num?)?.toDouble() ?? 0.0,
-        type: (j['type'] as num?)?.toInt() ?? 0,
-        beginShapeIndex: (j['begin_shape_index'] as num?)?.toInt() ?? 0,
-        endShapeIndex: (j['end_shape_index'] as num?)?.toInt() ?? 0,
-      );
+  factory Maneuver.fromJson(Map<String, dynamic> j) {
+    const required = [
+      'instruction',
+      'length_km',
+      'time_seconds',
+      'type',
+      'begin_shape_index',
+      'end_shape_index',
+    ];
+    for (final key in required) {
+      if (j[key] == null) {
+        developer.log(
+          'Maneuver.fromJson: missing field "$key"; defaulting',
+          name: 'maneuver',
+        );
+      }
+    }
+    return Maneuver(
+      instruction: j['instruction'] as String? ?? '',
+      streetNames: ((j['street_names'] as List?) ?? const [])
+          .map((e) => e.toString())
+          .toList(),
+      lengthKm: (j['length_km'] as num?)?.toDouble() ?? 0.0,
+      timeSeconds: (j['time_seconds'] as num?)?.toDouble() ?? 0.0,
+      type: (j['type'] as num?)?.toInt() ?? 0,
+      beginShapeIndex: (j['begin_shape_index'] as num?)?.toInt() ?? 0,
+      endShapeIndex: (j['end_shape_index'] as num?)?.toInt() ?? 0,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'instruction': instruction,

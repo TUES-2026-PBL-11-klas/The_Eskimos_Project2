@@ -1,13 +1,8 @@
-"""Unit tests for routing profiles (Strategy Pattern)."""
+"""Unit tests for routing profiles."""
 
 import pytest
 
-from app.profiles.bicycle import (
-    PROFILES,
-    CityBikeProfile,
-    ElectricBikeProfile,
-    MountainBikeProfile,
-)
+from app.profiles.bicycle import PROFILES
 
 
 def test_all_profiles_registered():
@@ -17,9 +12,9 @@ def test_all_profiles_registered():
 
 
 def test_city_bike_profile():
-    p = CityBikeProfile()
-    assert p.name() == "city_bike"
-    assert p.costing() == "bicycle"
+    p = PROFILES["city_bike"]
+    assert p.name == "city_bike"
+    assert p.costing == "bicycle"
     opts = p.costing_options()["bicycle"]
     assert opts["use_roads"] == 0.1
     assert opts["use_hills"] == 0.3
@@ -27,8 +22,7 @@ def test_city_bike_profile():
 
 
 def test_mountain_bike_profile():
-    p = MountainBikeProfile()
-    assert p.name() == "mountain_bike"
+    p = PROFILES["mountain_bike"]
     opts = p.costing_options()["bicycle"]
     assert opts["use_roads"] == 0.4
     assert opts["use_hills"] == 0.8
@@ -36,8 +30,7 @@ def test_mountain_bike_profile():
 
 
 def test_electric_bike_profile():
-    p = ElectricBikeProfile()
-    assert p.name() == "electric_bike"
+    p = PROFILES["electric_bike"]
     opts = p.costing_options()["bicycle"]
     assert opts["use_roads"] == 0.3
     assert opts["use_hills"] == 0.0, "Electric bike should ignore hills (motor assist)"
@@ -45,9 +38,9 @@ def test_electric_bike_profile():
 
 
 def test_city_bike_prefers_bike_lanes_over_mountain():
-    city = CityBikeProfile().costing_options()["bicycle"]
-    mountain = MountainBikeProfile().costing_options()["bicycle"]
-    assert city["use_roads"] < mountain["use_roads"], "CityBike must avoid roads more"
+    city = PROFILES["city_bike"]
+    mountain = PROFILES["mountain_bike"]
+    assert city.use_roads < mountain.use_roads, "CityBike must avoid roads more"
 
 
 @pytest.mark.parametrize("profile_name", list(PROFILES))
@@ -65,5 +58,5 @@ def test_profile_has_required_keys(profile_name):
 @pytest.mark.parametrize("profile_name", list(PROFILES))
 def test_profile_has_display_info(profile_name):
     profile = PROFILES[profile_name]
-    assert profile.display_name()
-    assert profile.description()
+    assert profile.display_name
+    assert profile.description

@@ -21,9 +21,9 @@ void main() {
       );
     });
 
-    test('fromValue falls back to cityBike on unknown input', () {
-      expect(BikeProfileId.fromValue('unknown'), BikeProfileId.cityBike);
-      expect(BikeProfileId.fromValue(''), BikeProfileId.cityBike);
+    test('fromValue throws ArgumentError on unknown input', () {
+      expect(() => BikeProfileId.fromValue('unknown'), throwsArgumentError);
+      expect(() => BikeProfileId.fromValue(''), throwsArgumentError);
     });
   });
 
@@ -54,11 +54,11 @@ void main() {
       expect(p.id, BikeProfileId.mountainBike);
     });
 
-    test('id falls back to cityBike for unknown name', () {
+    test('id throws on unknown name', () {
       final json = Map<String, dynamic>.from(sampleJson);
       json['name'] = 'gravity_bike';
       final p = BikeProfile.fromJson(json);
-      expect(p.id, BikeProfileId.cityBike);
+      expect(() => p.id, throwsArgumentError);
     });
 
     test('integer numeric fields get coerced to double', () {

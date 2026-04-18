@@ -8,6 +8,6 @@ class GeocodingRepository {
 
   Future<List<GeocodeResult>> search(String query, {int limit = 10}) {
     if (query.trim().length < 2) return Future.value(const []);
-    return _api.geocode(query.trim(), limit: limit);
+    return _api.geocode(query.trim(), limit: limit.clamp(1, 20));
   }
 }
