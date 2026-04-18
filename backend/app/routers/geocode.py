@@ -43,15 +43,20 @@ async def geocode(
 ) -> list[GeocodeResult]:
     params = {
         "q": q,
-        "lang": "bg",
+        "lang": "default",
         "limit": limit,
         "bbox": _SOFIA_BBOX,
         "lat": _SOFIA_CENTER_LAT,
         "lon": _SOFIA_CENTER_LON,
     }
 
+    headers = {
+        "User-Agent": "sofia-bike-routing/1.0 (+https://github.com/TUES-2026-PBL-11-klas)",
+        "Accept": "application/json",
+    }
+
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=10.0, headers=headers) as client:
             response = await client.get(_PHOTON_URL, params=params)
     except httpx.TimeoutException:
         logger.warning("Photon geocoder timeout for query %r", q)

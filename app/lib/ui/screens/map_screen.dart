@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:io';
 
@@ -56,10 +57,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     if (map == null || _bikeLanesAdded) return;
     try {
       final geojson = await ref.read(bikeLanesGeoJsonProvider.future);
+      debugPrint('[map_screen] bike-lanes geojson length=${geojson.length}');
+      final decoded = jsonDecode(geojson);
+      final featCount = decoded is Map && decoded['features'] is List
+          ? (decoded['features'] as List).length
+          : -1;
+      debugPrint('[map_screen] bike-lanes feature count=$featCount');
       await map.addSource(
         'bike-lanes-src',
-        GeojsonSourceProperties(data: geojson),
+        GeojsonSourceProperties(data: decoded),
       );
+      debugPrint('[map_screen] addSource succeeded');
       await map.addLineLayer(
         'bike-lanes-src',
         'bike-lanes-layer',
@@ -69,6 +77,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           lineOpacity: 0.9,
         ),
       );
+      debugPrint('[map_screen] addLineLayer succeeded');
       _bikeLanesAdded = true;
     } on SocketException {
       // Offline is normal — base map renders without overlay, no banner.

@@ -88,12 +88,17 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
   Future<void> _onStyleLoaded() async {
     if (_routeDrawn || _map == null) return;
     final shape = ref.read(navigationControllerProvider)?.shape;
-    if (shape == null) return;
+    if (shape == null || shape.length < 2) return;
     final coords = shape.map((p) => [p.longitude, p.latitude]).toList();
     final geojson = {
-      'type': 'Feature',
-      'geometry': {'type': 'LineString', 'coordinates': coords},
-      'properties': <String, dynamic>{},
+      'type': 'FeatureCollection',
+      'features': [
+        {
+          'type': 'Feature',
+          'geometry': {'type': 'LineString', 'coordinates': coords},
+          'properties': <String, dynamic>{},
+        },
+      ],
     };
     await _map!.addSource(
       'route-src',
@@ -121,10 +126,9 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
         route.maneuvers.isEmpty ? null : route.maneuvers[maneuverIdx];
 
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            flex: 3,
+          Positioned.fill(
             child: _styleLoadError != null
                 ? Center(
                     child: Padding(
@@ -150,20 +154,25 @@ class _NavigationScreenState extends ConsumerState<NavigationScreen> {
                     myLocationEnabled: true,
                   ),
           ),
-          Expanded(
-            flex: 2,
-            child: maneuver == null
-                ? const Center(child: CircularProgressIndicator())
-                : ManeuverCard(
-                    maneuver: maneuver,
-                    distanceToNextM:
-                        progress?.distanceToNextManeuverM ?? 0,
-                    remainingMinutes:
-                        (progress?.remainingDurationSeconds ??
-                                route.durationMinutes * 60) /
-                            60.0,
-                    onStop: () => Navigator.pop(context),
-                  ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: maneuver == null
+                  ? const SizedBox.shrink()
+                  : ManeuverCard(
+                      maneuver: maneuver,
+                      distanceToNextM:
+                          progress?.distanceToNextManeuverM ?? 0,
+                      remainingMinutes:
+                          (progress?.remainingDurationSeconds ??
+                                  route.durationMinutes * 60) /
+                              60.0,
+                      onStop: () => Navigator.pop(context),
+                    ),
+            ),
           ),
         ],
       ),

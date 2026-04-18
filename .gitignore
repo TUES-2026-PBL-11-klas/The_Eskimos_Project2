@@ -1,3 +1,4 @@
+@ -1,44 +0,0 @@
 # See https://www.dartlang.org/guides/libraries/private-files
 
 # Files and directories created by pub
@@ -42,3 +43,6 @@ elevation_data/
 
 # Docker volumes (not tracked)
 pbf_data/
+
+# Log files 
+*.log
